@@ -27,9 +27,48 @@ def test_console_script_points_at_a_real_callable():
     assert callable(getattr(module, attribute))
 
 
+def _stdlib_names():
+    """sys.stdlib_module_names is 3.10+; fall back to a list for older interpreters."""
+    names = getattr(sys, "stdlib_module_names", None)
+    if names is not None:
+        return set(names)
+    return {
+        "argparse",
+        "ast",
+        "collections",
+        "contextlib",
+        "csv",
+        "datetime",
+        "hashlib",
+        "http",
+        "io",
+        "json",
+        "math",
+        "os",
+        "pathlib",
+        "re",
+        "shutil",
+        "socket",
+        "ssl",
+        "statistics",
+        "string",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "typing",
+        "unittest",
+        "urllib",
+        "uuid",
+        "warnings",
+        "zlib",
+    }
+
+
 def test_no_third_party_imports():
     """Stdlib only: it has to run on a bare VPS with no pip access."""
-    allowed = set(sys.stdlib_module_names)
+    allowed = _stdlib_names()
     offenders = []
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
