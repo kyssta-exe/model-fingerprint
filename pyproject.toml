@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-fingerprint"
+version = "0.1.0"
+description = "Black-box fingerprinting of LLM endpoints: serving-stack DNA, tokenizer vectors, capability matrix, behaviour distributions."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Kyssta", email = "kyssta-exe@users.noreply.github.com" }]
+keywords = ["llm", "fingerprinting", "model-substitution", "api-audit", "attribution"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/kyssta-exe/model-fingerprint"
+Issues = "https://github.com/kyssta-exe/model-fingerprint/issues"
+
+[project.scripts]
+model-fingerprint = "model_fingerprint.cli:main"
+
+[tool.setuptools]
+packages = ["model_fingerprint"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+exclude = ["build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "BLE", "C4", "SIM", "RUF", "UP", "PL"]
+ignore = [
+    "UP031",  # %-formatting is intentional: keeps the code readable and 3.8-friendly
+    "UP032",
+    # "consider refactoring" hints, not defects: the probe builders are deliberately
+    # explicit and the mock handler is deliberately one long dispatch
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PLR0917",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "PLR2004",  # magic values are the point in assertions
+    "PLC0415",  # local imports in test bodies keep fixtures readable
+    "RUF005",
+]
+
