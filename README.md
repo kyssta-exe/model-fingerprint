@@ -100,6 +100,36 @@ model in one request, and a worked example. The short version:
 5. **Quantization changes behaviour, not the tokenizer** — expect family-level matches with
    model-level distribution mismatch.
 
+## Install as an agent skill
+
+`SKILL.md` follows the [Agent Skills](https://agentskills.io/) open standard, so the same file
+loads in Hermes, Claude Code, Codex CLI and anything else that reads `SKILL.md`:
+
+```bash
+./install.sh              # detect installed agents and install the skill for each
+./install.sh --list       # show what would be installed, change nothing
+./install.sh --project    # install into ./.claude/skills (commit it with your repo)
+./install.sh --copy       # standalone copy instead of a symlink
+./install.sh --force      # replace an existing directory (refused otherwise)
+./install.sh --dry-run    # print the actions, write nothing
+```
+
+Default mode symlinks this checkout into the agent's skills directory, so `git pull` keeps the
+skill current; `--copy` writes a self-contained directory (`SKILL.md` + the package + docs) for
+hosts without the clone. Manual equivalent — put the skill directory here:
+
+| Agent | Path |
+|---|---|
+| Hermes | `~/.hermes/skills/model-fingerprint/SKILL.md` |
+| Claude Code (personal) | `~/.claude/skills/model-fingerprint/SKILL.md` |
+| Claude Code (project) | `.claude/skills/model-fingerprint/SKILL.md` |
+| Codex CLI | `~/.codex/skills/model-fingerprint/SKILL.md` |
+| opencode | `~/.config/opencode/skill/model-fingerprint/SKILL.md` |
+
+The skill teaches an agent the whole loop: set up, run the offline test suite, fingerprint an
+endpoint, grade the evidence, and the traps that produce false results. It is drift-checked —
+`tests/test_skill.py` fails the build if the skill documents a flag the CLI does not implement.
+
 ## Tests
 
 ```bash
@@ -109,7 +139,9 @@ python -m pip install pytest && python -m pytest -q
 The suite runs entirely offline against `tests/mock_endpoint.py`, a local fake endpoint that
 speaks all four protocols with deterministic outputs and realistic failure modes (routing-header
 enforcement, output caps, context caps, reasoning models that eat the budget, missing usage).
-Nothing in the suite touches the network or needs a key.
+Nothing in the suite touches the network or needs a key. It also covers the agent skill and the
+installer: frontmatter rules, flag drift, and that `install.sh` is idempotent and never clobbers
+an unrelated directory.
 
 ## Related work
 
